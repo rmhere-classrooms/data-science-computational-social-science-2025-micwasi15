@@ -18,18 +18,18 @@ plot(
   main = "Graf Barabási–Albert (layout Fruchterman-Reingold)"
 )
 
-# 3. Znajdź najbardziej centralny węzeł według miary betweenness, jaki ma numer?
+# 4. Znajdź najbardziej centralny węzeł według miary betweenness, jaki ma numer?
 btw <- betweenness(g, directed = FALSE, normalized = TRUE)
 most_central_node <- which.max(btw)
 
 cat("\nNajbardziej centralny węzeł (betweenness):", most_central_node, "\n")
 cat("Jego wartość betweenness:", btw[most_central_node], "\n\n")
 
-# 4. Jaka jest średnica grafu?
+# 5. Jaka jest średnica grafu?
 graph_diameter <- diameter(g)
 cat("Średnica grafu:", graph_diameter, "\n")
 
-# 5. W komentarzu napisz czym różnią się grafy Barabási-Albert i Erdős-Rényi.
+# 6. W komentarzu napisz czym różnią się grafy Barabási-Albert i Erdős-Rényi.
 
 # Graf Erdős–Rényi powstaje całkowicie losowo, więc większość węzłów ma
 # podobną liczbę połączeń i nie pojawiają się wyraźne huby.
