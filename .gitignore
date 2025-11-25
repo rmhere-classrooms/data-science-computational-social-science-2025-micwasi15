@@ -2,3 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
+/mysolution/rsconnect/*
+/mysolution/app.R
