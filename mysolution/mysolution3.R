@@ -61,13 +61,12 @@ ic_simulate_once_cumulative <- function(g, seeds, p_scale = 1.0, max_iter) {
   frontier <- as.character(seeds)
   attempted_edges <- new.env(hash = TRUE, parent = emptyenv())
 
-  cumulative_active <- integer(max_iter)
-
-  active_count <- sum(activated)
+  active <- integer(max_iter + 1)
+  active[1] <- length(seeds)
 
   for (i in seq_len(max_iter)) {
     if (length(frontier) == 0) {
-      cumulative_active[i:max_iter] <- active_count
+      active[(i+1):(max_iter+1)] <- 0
       break
     }
 
@@ -97,16 +96,15 @@ ic_simulate_once_cumulative <- function(g, seeds, p_scale = 1.0, max_iter) {
     newly_activated_vector <- unique(newly_activated_vector)
     frontier <- newly_activated_vector
 
-    active_count <- active_count + length(newly_activated_vector)
-    cumulative_active[i] <- active_count
+    active[i + 1] <- length(newly_activated_vector)
   }
 
-  return(cumulative_active)
+  return(active)
 }
 
 
 ic_simulate_average <- function(g, seeds_func, runs = 100, p_scale = 1.0, max_iter) {
-  all_runs <- matrix(0, nrow = runs, ncol = max_iter)
+  all_runs <- matrix(0, nrow = runs, ncol = max_iter + 1)
 
   for (r in seq_len(runs)) {
     seeds <- seeds_func(r)
@@ -148,7 +146,7 @@ server <- function(input, output, session) {
     p_scale <- input$p_pct / 100
     vert_count <- vcount(g)
     seed_share <- 0.05
-    seed_count <- max(1, ceiling(vert_count * seed_share))
+    seed_count <- as.integer(vert_count * seed_share)
 
     # 8. Wykonaj powyższy eksperyment dla pięciu różnych zbiorów węzłów początkowych: (i)
     # węzłów o największym outdegree, (ii) dla najbardziej centralnych węzłów wedle metody
@@ -190,14 +188,14 @@ server <- function(input, output, session) {
     avg_rand <- ic_simulate_average(g, seeds_random, p_scale = p_scale, max_iter = max_iter)
     avg_kcore <- ic_simulate_average(g, seeds_kcore, p_scale = p_scale, max_iter = max_iter)
 
-    list(iter = seq_len(max_iter),
-         outdeg = avg_outdeg,
-         btw = avg_btw,
-         clo = avg_clo,
-         rand = avg_rand,
-         kcore = avg_kcore,
-         k_seeds = seed_count,
-         p_scale = p_scale)
+    list(iter = seq(0, max_iter),
+      outdeg = avg_outdeg,
+      btw = avg_btw,
+      clo = avg_clo,
+      rand = avg_rand,
+      kcore = avg_kcore,
+      k_seeds = seed_count,
+      p_scale = p_scale)
   })
 
   # 9. Jako podsumowanie realizacji zadania przygotuj wykres obrazujący jak przebiegał proces
@@ -207,7 +205,7 @@ server <- function(input, output, session) {
   output$diff_plot <- renderPlot({
     sim <- sim_result()
 
-    max_iter <- length(sim$iter)
+    display_max_iter <- max(sim$iter)
     mat <- cbind(sim$outdeg, sim$btw, sim$clo, sim$rand, sim$kcore)
     ymax <- max(mat) * 1.1
     cols <- c("red", "blue", "forestgreen", "orange", "purple")
@@ -220,8 +218,9 @@ server <- function(input, output, session) {
     plot(sim$iter, sim$outdeg, type = "o", pch = 16, lwd = 2, ylim = c(0, ymax),
          xlab = "Iteracja", ylab = "Średnia liczba aktywowanych węzłów",
          main = paste0("Modyfikator prawdopodobieństwa aktywacji: ",
-                       sim$p_scale, "\nIteracje: ", max_iter),
-         col = cols[1])
+               sim$p_scale, "\nIteracje: ", display_max_iter),
+         col = cols[1], xaxt = "n", xlim = c(min(sim$iter), max(sim$iter)))
+    axis(1, at = sim$iter, labels = sim$iter)
     lines(sim$iter, sim$btw, type = "o", pch = 16, lwd = 2, col = cols[2])
     lines(sim$iter, sim$clo, type = "o", pch = 16, lwd = 2, col = cols[3])
     lines(sim$iter, sim$rand, type = "o", pch = 16, lwd = 2, col = cols[4])

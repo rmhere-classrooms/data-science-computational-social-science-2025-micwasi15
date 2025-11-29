@@ -46,8 +46,8 @@ hist(deg,
 
 # 8. Ile jest klastrów (connected components) w grafie?
 comp <- components(g)
-cat("\nLiczba spójnych składowych:", comp$no, "\n")
-# Są 3 składowe
+cat("\nLiczba klastrów:", comp$no, "\n")
+# Są 3 klastry
 
 # 9. Zwizualizuj graf w taki sposób, aby rozmiar węzłów odpowiadał mierze PageRank.
 pr <- page_rank(g, weights = E(g)$weight)$vector

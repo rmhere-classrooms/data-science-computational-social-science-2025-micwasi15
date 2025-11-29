@@ -19,7 +19,7 @@ plot(
 )
 
 # 4. Znajdź najbardziej centralny węzeł według miary betweenness, jaki ma numer?
-btw <- betweenness(g, directed = FALSE, normalized = TRUE)
+btw <- betweenness(g, directed = FALSE)
 most_central_node <- which.max(btw)
 
 cat("\nNajbardziej centralny węzeł (betweenness):", most_central_node, "\n")
